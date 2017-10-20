@@ -222,6 +222,73 @@ generate_lipidblast_tbl <- function(json_path){
 }
 
 
+generate_hmdb_tbl <- function(path) {
+    if (missing(path))
+        stop("'path' is required")
+    path <- normalizePath(path)
+    xmls <- dir(path, pattern = "xml", full.names = TRUE)
+    if (length(xmls) == 0)
+        stop("No xml found in directory ", path)
+    
+}
+
+#' @description Parse one HMDB xml file and return its results as a `data.frame`
+#'
+#' @details Report the `"monisotopic_molecular_weight"` in column `"mass"`
+#'
+#' @param x `character(1)` with the file name.
+#'
+#' @return `data.frame` with columns:
+#' + `id`: the HMDB ID of the compound.
+#' + `name`: the compound's name.
+#' + `inchi`: the inchi of the compound.
+#' + `formula`: the chemical formula.
+#' + `mass`: the compound's mass. The value from HMDB's
+#'   `monisotopoc_molecular_weight` is used.
+#' 
+#' @md
+#'
+#' @importFrom xml2 read_xml xml_find_all xml_find_first xml_text xml_double
+#'     xml_ns
+#'
+#' @author Johannes Rainer
+#' 
+#' @noRd
+#'
+#' @examples
+#'
+#' x <- system.file("extdata/hmdb/HMDB0000001.xml", package = "PeakABro")
+#' x <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
+simple_parse_hmdb_xml <- function(x) {
+    x <- read_xml(x)
+    ns <- ""
+    if (length(xml_ns(x)))
+        ns <- "d1:"
+    metabolites <- xml_find_all(x, paste0("//", ns, "metabolite"))
+    if (length(metabolites) == 0)
+        stop("Can not find a single metabolite in the XML file")
+    ## Define the function to extract the data
+    hmdb_extract_metabolite <- function(met, ns) {
+        data.frame(
+            id = xml_text(
+                xml_find_first(met, paste0("./", ns, "accession"))),
+            name = xml_text(
+                xml_find_first(met, paste0("./", ns, "name"))),
+            inchi = xml_text(
+                xml_find_first(met, paste0("./", ns, "inchi"))),
+            formula = xml_text(
+                xml_find_first(met, paste0("./", ns, "chemical_formula"))),
+            mass = xml_double(
+                xml_find_first(met, paste0("./", ns,
+                                           "monisotopic_molecular_weight"))),
+            stringsAsFactors = FALSE
+            )
+    }
+    do.call(rbind,
+            lapply(metabolites, FUN = hmdb_extract_metabolite, ns = ns))
+}
+
+
 #' Prepare compound table for interactive display
 #' 
 #' This function modifies some of the columns in a compound table to be displayed better in an interactive table.
