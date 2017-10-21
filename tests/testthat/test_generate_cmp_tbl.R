@@ -18,3 +18,5 @@ test_that("simple_parse_hmdb_xml works", {
     expect_equal(res$id, c("HMDB0000001", "HMDB0000002", "HMDB0000005"))
     expect_equal(colnames(res), c("id", "name", "inchi", "formula", "mass"))
 })
+
+## It's mocu to slow

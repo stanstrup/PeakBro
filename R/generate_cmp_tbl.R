@@ -234,7 +234,12 @@ generate_hmdb_tbl <- function(path) {
 
 #' @description Parse one HMDB xml file and return its results as a `data.frame`
 #'
-#' @details Report the `"monisotopic_molecular_weight"` in column `"mass"`
+#' @details Report the `"monisotopic_molecular_weight"` in column `"mass"`.
+#'    The function contains two different parsing approaches: a fast and a slow
+#'    one. The fast one works if the file is in the correct format and should
+#'    hence always work. The second approach, that iterates through the
+#'    individual metabolite definitions within the xml file is much slower, but
+#'    is expected to be fail save.
 #'
 #' @param x `character(1)` with the file name.
 #'
@@ -264,30 +269,53 @@ simple_parse_hmdb_xml <- function(x) {
     ns <- ""
     if (length(xml_ns(x)))
         ns <- "d1:"
-    metabolites <- xml_find_all(x, paste0("//", ns, "metabolite"))
+    x_met <- paste0("//", ns, "metabolite")
+    metabolites <- xml_find_first(x, x_met)
     if (length(metabolites) == 0)
         stop("Can not find a single metabolite in the XML file")
-    ## Define the function to extract the data
-    hmdb_extract_metabolite <- function(met, ns) {
-        data.frame(
-            id = xml_text(
-                xml_find_first(met, paste0("./", ns, "accession"))),
-            name = xml_text(
-                xml_find_first(met, paste0("./", ns, "name"))),
-            inchi = xml_text(
-                xml_find_first(met, paste0("./", ns, "inchi"))),
-            formula = xml_text(
-                xml_find_first(met, paste0("./", ns, "chemical_formula"))),
-            mass = xml_double(
-                xml_find_first(met, paste0("./", ns,
-                                           "monisotopic_molecular_weight"))),
-            stringsAsFactors = FALSE
+    ## Now, test if we can get all in one go, otherwise we have to switch to
+    ## a (much) slower version
+    res <- list(
+        accession = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
+                                                    "accession"))),
+        name = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "name"))),
+        inchi = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "inchi"))),
+        formula = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
+                                                  "chemical_formula"))),
+        mass = xml_double(xml_find_all(x, paste0(x_met, "/", ns,
+                                                 "monisotopic_molecular_weight")))
+    )
+    if (length(unique(lengths(res))) == 1) {
+        res <- as.data.frame(res, stringsAsFactors = FALSE)
+    } else {
+        ## Fail back to a much slower version.
+        message("Something went wrong during the processing of the file. Have",
+                " to switch to a slower parser.")
+        ## Define the function to extract the data
+        hmdb_extract_metabolite <- function(met, ns) {
+            data.frame(
+                id = xml_text(
+                    xml_find_first(met, paste0("./", ns, "accession"))),
+                name = xml_text(
+                    xml_find_first(met, paste0("./", ns, "name"))),
+                inchi = xml_text(
+                    xml_find_first(met, paste0("./", ns, "inchi"))),
+                formula = xml_text(
+                    xml_find_first(met, paste0("./", ns, "chemical_formula"))),
+                mass = xml_double(
+                    xml_find_first(met, paste0("./", ns,
+                                               "monisotopic_molecular_weight"))),
+                stringsAsFactors = FALSE
             )
+        }
+        metabolites <- xml_find_all(x, x_met)
+        res <- do.call(rbind,
+                       lapply(metabolites, FUN = hmdb_extract_metabolite,
+                              ns = ns))
     }
-    do.call(rbind,
-            lapply(metabolites, FUN = hmdb_extract_metabolite, ns = ns))
+    res
 }
-
+    
 
 #' Prepare compound table for interactive display
 #' 
