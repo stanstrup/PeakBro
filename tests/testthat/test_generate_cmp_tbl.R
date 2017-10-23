@@ -50,4 +50,17 @@ test_that("generate_hmdb_tbl works", {
     expect_true(nrow(res) == 4)
     expect_equal(colnames(res), c("id" ,"name", "inchi",
                                   "formula", "mass"))
+
+    ## SDF format
+    sdf <- system.file("extdata/hmdb/hmdb_sub.sdf", package = "PeakABro")
+    res_xml <- generate_hmdb_tbl(more)
+    res_sdf <- generate_hmdb_tbl(sdf)
+    have_id <- res_sdf$id %in% res_xml$id
+    expect_equal(res_xml, res_sdf[have_id, ])
+})
+
+test_that("parse_hmdb_sdf works", {
+    sdf <- system.file("extdata/hmdb/hmdb_sub.sdf", package = "PeakABro")
+    res <- PeakABro:::parse_hmdb_sdf(sdf)
+    expect_true(is.numeric(res$mass))
 })

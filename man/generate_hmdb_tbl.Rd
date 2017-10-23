@@ -7,10 +7,11 @@
 generate_hmdb_tbl(file)
 }
 \arguments{
-\item{file}{\code{character} with the name(s) of xml files downloaded from HMDB.
-Can be a single xml file (containing all compounds from an HMDB release)
-or the names of several xml files, each supposed to provide data for one
-compound.}
+\item{file}{\code{character} with the name(s) of xml files downloaded from HMDB,
+or the file name of a HMD file in SDF format.
+For xml files: can be a single xml file (containing all compounds from
+an HMDB release) or the names of several xml files, each supposed to
+provide data for one compound.}
 }
 \value{
 A \code{tbl} with general compound information (one row per compound):
@@ -25,8 +26,8 @@ A \code{tbl} with general compound information (one row per compound):
 }
 \description{
 \code{generate_hmdb_tbl} processes one or more HMDB xml files
-(downloaded from http://http://www.hmdb.ca/) and extracts general
-compound information.
+(downloaded from http://http://www.hmdb.ca/) or an HMDB file in SDF
+format and extracts general compound information.
 }
 \note{
 At present only a subset of the available data provided by HMDB are
@@ -44,6 +45,11 @@ hmdb
 fl <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
 hmdb <- generate_hmdb_tbl(fl)
 colnames(hmdb)
+hmdb
+
+## Extract compound information from a HMDB file in SDF format
+fl <- system.file("extdata/hmdb/hmdb_sub.sdf", package = "PeakABro")
+hmdb <- generate_hmdb_tbl(fl)
 hmdb
 
 ## Extract the masses

@@ -225,16 +225,17 @@ generate_lipidblast_tbl <- function(json_path){
 #' @title Generate a table with HMDB compounds
 #'
 #' @description `generate_hmdb_tbl` processes one or more HMDB xml files
-#'     (downloaded from http://http://www.hmdb.ca/) and extracts general
-#'     compound information.
+#'     (downloaded from http://http://www.hmdb.ca/) or an HMDB file in SDF
+#'     format and extracts general compound information.
 #'
 #' @note At present only a subset of the available data provided by HMDB are
 #'     extracted.
 #' 
-#' @param file `character` with the name(s) of xml files downloaded from HMDB.
-#'     Can be a single xml file (containing all compounds from an HMDB release)
-#'     or the names of several xml files, each supposed to provide data for one
-#'     compound.
+#' @param file `character` with the name(s) of xml files downloaded from HMDB,
+#'     or the file name of a HMD file in SDF format.
+#'     For xml files: can be a single xml file (containing all compounds from
+#'     an HMDB release) or the names of several xml files, each supposed to
+#'     provide data for one compound.
 #'
 #' @return A `tbl` with general compound information (one row per compound):
 #' + `id`: the HMDB ID of the compound.
@@ -245,6 +246,7 @@ generate_lipidblast_tbl <- function(json_path){
 #'   `monisotopic_molecular_weight` is returned.
 #'
 #' @importFrom dplyr as.tbl
+#' @importFrom tools file_ext
 #'
 #' @export
 #' 
@@ -268,6 +270,11 @@ generate_lipidblast_tbl <- function(json_path){
 #' colnames(hmdb)
 #' hmdb
 #'
+#' ## Extract compound information from a HMDB file in SDF format
+#' fl <- system.file("extdata/hmdb/hmdb_sub.sdf", package = "PeakABro")
+#' hmdb <- generate_hmdb_tbl(fl)
+#' hmdb
+#' 
 #' ## Extract the masses
 #' hmdb$mass
 generate_hmdb_tbl <- function(file) {
@@ -277,7 +284,14 @@ generate_hmdb_tbl <- function(file) {
     if (any(!file.exists(file)))
         stop("Can not find file: ", paste(file[!file.exists(file)],
                                           collapse = ", "))
-    as.tbl(do.call(rbind, lapply(file, simple_parse_hmdb_xml)))
+    ## Check if we've got an xml file or a sdf file...
+    if (any(tolower(file_ext(file)) == "xml")) {
+        res <- as.tbl(do.call(rbind, lapply(file, simple_parse_hmdb_xml)))
+    } else {
+        ## Assume we've go A SINGLE file in SDF format.
+        res <- as.tbl(do.call(rbind, lapply(file, parse_hmdb_sdf)))
+    }
+    res
 }
 
 #' @description Parse one HMDB xml file and return its results as a `data.frame`
@@ -367,7 +381,21 @@ simple_parse_hmdb_xml <- function(x) {
     }
     res
 }
-    
+
+#' @description Parse the HMDB data in SDF format.
+#'
+#' @importFrom ChemmineR read.SDFset datablock datablock2ma
+#' @noRd
+parse_hmdb_sdf <- function(x) {
+    dblock <- datablock(read.SDFset(x))
+    full_mat <- datablock2ma(dblock)
+    data.frame(id = full_mat[, "DATABASE_ID"],
+               name = full_mat[, "GENERIC_NAME"],
+               inchi = full_mat[, "INCHI_IDENTIFIER"],
+               formula = full_mat[, "FORMULA"],
+               mass = as.numeric(full_mat[, "EXACT_MASS"]),
+               stringsAsFactors = FALSE)
+}
 
 #' Prepare compound table for interactive display
 #' 
