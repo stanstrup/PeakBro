@@ -19,4 +19,35 @@ test_that("simple_parse_hmdb_xml works", {
     expect_equal(colnames(res), c("id", "name", "inchi", "formula", "mass"))
 })
 
-## It's mocu to slow
+test_that("generate_hmdb_tbl works", {
+    ## Input files
+    one <- system.file("extdata/hmdb/HMDB0000001.xml", package = "PeakABro")
+    more <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
+    ## Exceptions
+    suppressWarnings(
+        expect_error(generate_hmdb_tbl("I do not exist"))
+    )
+    suppressWarnings(
+        expect_error(generate_hmdb_tbl(c("I do not exist", one)))
+    )
+    ## Read one file
+    res <- generate_hmdb_tbl(one)
+    expect_true(is.data.frame(res))
+    expect_true(any(class(res) == "tbl"))
+    expect_true(nrow(res) == 1)
+    expect_equal(colnames(res), c("id" ,"name", "inchi",
+                                  "formula", "mass"))
+    res <- generate_hmdb_tbl(more)
+    expect_true(is.data.frame(res))
+    expect_true(any(class(res) == "tbl"))
+    expect_true(nrow(res) == 3)
+    expect_equal(colnames(res), c("id" ,"name", "inchi",
+                                  "formula", "mass"))
+    ## Read multiple files
+    res <- generate_hmdb_tbl(c(one, more))
+    expect_true(is.data.frame(res))
+    expect_true(any(class(res) == "tbl"))
+    expect_true(nrow(res) == 4)
+    expect_equal(colnames(res), c("id" ,"name", "inchi",
+                                  "formula", "mass"))
+})

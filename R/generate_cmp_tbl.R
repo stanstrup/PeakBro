@@ -222,14 +222,62 @@ generate_lipidblast_tbl <- function(json_path){
 }
 
 
-generate_hmdb_tbl <- function(path) {
-    if (missing(path))
-        stop("'path' is required")
-    path <- normalizePath(path)
-    xmls <- dir(path, pattern = "xml", full.names = TRUE)
-    if (length(xmls) == 0)
-        stop("No xml found in directory ", path)
-    
+#' @title Generate a table with HMDB compounds
+#'
+#' @description `generate_hmdb_tbl` processes one or more HMDB xml files
+#'     (downloaded from http://http://www.hmdb.ca/) and extracts general
+#'     compound information.
+#'
+#' @note At present only a subset of the available data provided by HMDB are
+#'     extracted.
+#' 
+#' @param file `character` with the name(s) of xml files downloaded from HMDB.
+#'     Can be a single xml file (containing all compounds from an HMDB release)
+#'     or the names of several xml files, each supposed to provide data for one
+#'     compound.
+#'
+#' @return A `tbl` with general compound information (one row per compound):
+#' + `id`: the HMDB ID of the compound.
+#' + `name`: the compound's name.
+#' + `inchi`: the inchi of the compound.
+#' + `formula`: the chemical formula.
+#' + `mass`: the compound's mass. The value from HMDB's
+#'   `monisotopic_molecular_weight` is returned.
+#'
+#' @importFrom dplyr as.tbl
+#'
+#' @export
+#' 
+#' @md
+#'
+#' @export
+#'
+#' @author Johannes Rainer
+#'
+#' @examples
+#'
+#' ## Extract compound information from a single xml file from HMDB.
+#' fl <- system.file("extdata/hmdb/HMDB0000001.xml", package = "PeakABro")
+#' hmdb <- generate_hmdb_tbl(fl)
+#' colnames(hmdb)
+#' hmdb
+#' 
+#' ## Extract compound information from a (subset of a) HMDB release xml file.
+#' fl <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
+#' hmdb <- generate_hmdb_tbl(fl)
+#' colnames(hmdb)
+#' hmdb
+#'
+#' ## Extract the masses
+#' hmdb$mass
+generate_hmdb_tbl <- function(file) {
+    if (missing(file))
+        stop("'file' is required")
+    file <- normalizePath(file)
+    if (any(!file.exists(file)))
+        stop("Can not find file: ", paste(file[!file.exists(file)],
+                                          collapse = ", "))
+    as.tbl(do.call(rbind, lapply(file, simple_parse_hmdb_xml)))
 }
 
 #' @description Parse one HMDB xml file and return its results as a `data.frame`
@@ -263,7 +311,9 @@ generate_hmdb_tbl <- function(path) {
 #' @examples
 #'
 #' x <- system.file("extdata/hmdb/HMDB0000001.xml", package = "PeakABro")
+#' simple_parse_hmdb_xml(x)
 #' x <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
+#' simple_parse_hmdb_xml(x)
 simple_parse_hmdb_xml <- function(x) {
     x <- read_xml(x)
     ns <- ""
@@ -276,14 +326,15 @@ simple_parse_hmdb_xml <- function(x) {
     ## Now, test if we can get all in one go, otherwise we have to switch to
     ## a (much) slower version
     res <- list(
-        accession = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
-                                                    "accession"))),
+        id = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
+                                             "accession"))),
         name = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "name"))),
         inchi = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "inchi"))),
         formula = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
                                                   "chemical_formula"))),
-        mass = xml_double(xml_find_all(x, paste0(x_met, "/", ns,
-                                                 "monisotopic_molecular_weight")))
+        mass = xml_double(xml_find_all(x,
+                                       paste0(x_met, "/", ns,
+                                              "monisotopic_molecular_weight")))
     )
     if (length(unique(lengths(res))) == 1) {
         res <- as.data.frame(res, stringsAsFactors = FALSE)
@@ -303,8 +354,9 @@ simple_parse_hmdb_xml <- function(x) {
                 formula = xml_text(
                     xml_find_first(met, paste0("./", ns, "chemical_formula"))),
                 mass = xml_double(
-                    xml_find_first(met, paste0("./", ns,
-                                               "monisotopic_molecular_weight"))),
+                    xml_find_first(met,
+                                   paste0("./", ns,
+                                          "monisotopic_molecular_weight"))),
                 stringsAsFactors = FALSE
             )
         }
