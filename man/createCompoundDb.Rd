@@ -2,22 +2,43 @@
 % Please edit documentation in R/createCompoundDbPackage.R
 \name{createCompoundDb}
 \alias{createCompoundDb}
+\alias{createCompoundDbPackage}
 \title{Create a CompoundDb database}
 \usage{
 createCompoundDb(x, metadata, path = ".")
+
+createCompoundDbPackage(x, version, maintainer, author, path = ".",
+  license = "Artistic-2.0")
 }
 \arguments{
-\item{x}{\code{data.frame} or \code{tbl} with the compound annotations. See
-description for details.}
+\item{x}{For \code{createCompoundDb}: \code{data.frame} or \code{tbl} with the compound
+annotations. See description for details.\preformatted{For `createCompoundDbPackage`: `character(1)` with the file name of the
+`CompoundDb` SQLite file (created by `createCompoundDb`).
+}}
 
-\item{metadata}{\code{data.frame} with metadata information. See description for
-details.}
+\item{metadata}{For \code{createCompoundDb}: \code{data.frame} with metadata
+information. See description for details.}
 
 \item{path}{\code{character(1)} with the path to the directory where the database
-file should be written. Defaults to the current directory.}
+file or package folder should be written. Defaults to the current
+directory.}
+
+\item{version}{For \code{createCompoundDbPackage}: \code{character(1)} with the version
+of the package (ideally in the format \code{"x.y.z"}).}
+
+\item{maintainer}{For \code{createCompoundDbPackage}: \code{character(1)} with the
+name and email address of the package maintainer (in the form
+\code{"First Last <first.last@provider.com>"}.}
+
+\item{author}{For \code{createCompoundDbPackage}: \code{character(1)} with the name
+of the package author.}
+
+\item{license}{For \code{createCompoundDbPackage}: \code{character(1)} with the
+license of the package respectively the originating provider.}
 }
 \value{
-A \code{character} with the database name (invisibly).
+For \code{createCompoundDb}: a \code{character(1)} with the database name
+(invisibly).
 }
 \description{
 \code{createCompoundDb} creates a \code{SQLite}-based \code{\link{CompoundDb}} object/database
@@ -46,6 +67,9 @@ The metadata \code{data.frame} is supposed to have two columns named \code{"name
 \item \code{"organism"}: the organism. Should be in the form \code{"Hsapiens"} or
 \code{"Mmusculus"}.
 }
+
+\code{createCompoundDbPackage} creates an R data package with the data from a
+\code{\link{CompoundDb}} object.
 }
 \details{
 Metadata information is also used to create the file name for the database

@@ -32,16 +32,21 @@
 #' data source and its version. A compound database file for HMDB version 4
 #' with human metabolites will thus be named: `"CompoundDb.Hsapiens.HMDB.v4"`.
 #' 
-#' @param x `data.frame` or `tbl` with the compound annotations. See
-#'     description for details.
+#' @param x For `createCompoundDb`: `data.frame` or `tbl` with the compound
+#'     annotations. See description for details.
 #'
-#' @param metadata `data.frame` with metadata information. See description for
-#'     details.
+#'     For `createCompoundDbPackage`: `character(1)` with the file name of the
+#'     `CompoundDb` SQLite file (created by `createCompoundDb`).
+#'
+#' @param metadata For `createCompoundDb`: `data.frame` with metadata
+#'     information. See description for details.
 #'
 #' @param path `character(1)` with the path to the directory where the database
-#'     file should be written. Defaults to the current directory.
+#'     file or package folder should be written. Defaults to the current
+#'     directory.
 #'
-#' @return A `character` with the database name (invisibly).
+#' @return For `createCompoundDb`: a `character(1)` with the database name
+#'     (invisibly).
 #' 
 #' @importFrom DBI dbDriver dbWriteTable dbExecute dbDisconnect
 #' @importFrom RSQLite dbConnect
@@ -165,4 +170,62 @@ createCompoundDb <- function(x, metadata, path = ".") {
 #' `createCompoundDbPackage` creates an R data package with the data from a
 #' [`CompoundDb`] object.
 #'
-#' @noRd
+#' @importFrom Biobase createPackage
+#'
+#' @param version For `createCompoundDbPackage`: `character(1)` with the version
+#'     of the package (ideally in the format `"x.y.z"`).
+#'
+#' @param maintainer For `createCompoundDbPackage`: `character(1)` with the
+#'     name and email address of the package maintainer (in the form
+#'     `"First Last <first.last@provider.com>"`.
+#'
+#' @param author For `createCompoundDbPackage`: `character(1)` with the name
+#'     of the package author.
+#'
+#' @param license For `createCompoundDbPackage`: `character(1)` with the
+#'     license of the package respectively the originating provider.
+#' 
+#' @export
+#'
+#' @md
+#' 
+#' @rdname createCompoundDb
+createCompoundDbPackage <- function(x, version, maintainer, author,
+                                    path = ".", license = "Artistic-2.0") {
+    if (missing(x) | missing(version) | missing(maintainer) | missing(author))
+        stop("'x', 'version', 'maintainer' and 'author' are required")
+    if (!is.character(x))
+        stop("'x' is supposed to be the file name of the CompoundDb")
+    cdb <- CompoundDb(x)
+    metad <- .metadata(cdb)
+    pkg_name <- .db_file_from_metadata(metad)
+    m_source <- .metadata_value(cdb, "source")
+    m_source_version <- .metadata_value(cdb, "source_version")
+    m_source_date <- .metadata_value(cdb, "source_date")
+    m_organism <- .metadata_value(cdb, "organism")
+    m_source_url <- .metadata_value(cdb, "url")
+    template_path <- system.file("pkg-template", package = "PeakABro")
+    symvals <- list(
+        PKGTITLE = paste0(m_source, " compound annotation package"),
+        PKGDESCRIPTION = paste0("Exposes a CompoundDb compound annotation ",
+                                "databases with annotations retrieved from ",
+                                m_source, "."),
+        PKGVERSION  = version,
+        AUTHOR = author,
+        MAINTAINER = maintainer,
+        LIC = license,
+        ORGANISM = m_organism,
+        SPECIES = m_organism,
+        SOURCE = m_source,
+        SOURCEVERSION = as.character(m_source_version),
+        RELEASEDATE = m_source_date,
+        SOURCEURL =  m_source_url,
+        DBOBJNAME = pkg_name
+    )
+    createPackage(pkgname = pkg_name, destinationDir = path,
+                  originDir = template_path, symbolValues = symvals)
+    sqlite_path <- file.path(path, pkg_name, "inst", "extdata")
+    dir.create(sqlite_path, showWarnings = FALSE, recursive = TRUE)
+    file.copy(x, to = file.path(sqlite_path, paste0(pkg_name, ".sqlite")))
+    invisible(TRUE)
+}
