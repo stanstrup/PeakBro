@@ -1,6 +1,8 @@
 test_that(".valid_metadata works", {
     ## Check errors.
     expect_error(PeakABro:::.valid_metadata("something"))
+    expect_true(is.character(
+        PeakABro:::.valid_metadata("something", error = FALSE)))
     metadata <- data.frame(name = c("source", "url", "source_version",
                                    "source_date", "organism"),
                            value = c("HMDB", "http://www.hmdb.ca", "4", "2017",
@@ -33,6 +35,7 @@ test_that(".valid_compound works", {
     expect_true(PeakABro:::.valid_compound(cmps))
     ## Errors
     expect_error(PeakABro:::.valid_compound("b"))
+    expect_true(is.character(PeakABro:::.valid_compound("b", error = FALSE)))
     expect_error(PeakABro:::.valid_compound(data.frame()))
     expect_error(PeakABro:::.valid_compound(cmps[, 1:3]))
     cmps$mass <- c("1", "2")

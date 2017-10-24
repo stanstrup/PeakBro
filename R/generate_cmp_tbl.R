@@ -247,6 +247,7 @@ generate_lipidblast_tbl <- function(json_path){
 #'
 #' @importFrom dplyr as.tbl
 #' @importFrom tools file_ext
+#' @importFrom purrr map_dfr
 #'
 #' @export
 #' 
@@ -286,12 +287,12 @@ generate_hmdb_tbl <- function(file) {
                                           collapse = ", "))
     ## Check if we've got an xml file or a sdf file...
     if (any(tolower(file_ext(file)) == "xml")) {
-        res <- as.tbl(do.call(rbind, lapply(file, simple_parse_hmdb_xml)))
+        res <- map_dfr(file, simple_parse_hmdb_xml)
     } else {
         ## Assume we've go A SINGLE file in SDF format.
-        res <- as.tbl(do.call(rbind, lapply(file, parse_hmdb_sdf)))
+        res <- map_dfr(file, parse_hmdb_sdf)
     }
-    res
+    as.tbl(res)
 }
 
 #' @description Parse one HMDB xml file and return its results as a `data.frame`

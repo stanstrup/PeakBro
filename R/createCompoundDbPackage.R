@@ -36,7 +36,7 @@
 #'
 #' @return A `character` with the database name (invisibly).
 #' 
-#' @importFrom DBI dbDriver dbWriteTable dbExecute
+#' @importFrom DBI dbDriver dbWriteTable dbExecute dbDisconnect
 #' @importFrom RSQLite dbConnect
 #'
 #' @export
@@ -68,7 +68,7 @@
 createCompoundDb <- function(x, metadata, path = ".") {
     .valid_metadata(metadata)
     .valid_compound(x)
-    db_file <- paste0(path, .db_file_from_metadata(metadata), ".sqlite")
+    db_file <- paste0(path, "/", .db_file_from_metadata(metadata), ".sqlite")
     con <- dbConnect(dbDriver("SQLite"), dbname = db_file)
     ## Add additional metadata info
     metadata <- rbind(metadata, c("db_creation_date", date()))
@@ -79,6 +79,7 @@ createCompoundDb <- function(x, metadata, path = ".") {
     ## Creating indices
     dbExecute(con, paste0("create index compound_id_idx on compound (id)"))
     dbExecute(con, paste0("create index compound_name_idx on compound (name)"))
+    dbDisconnect(con)
     invisible(db_file)
 }
 
@@ -100,7 +101,7 @@ createCompoundDb <- function(x, metadata, path = ".") {
 #' @description Check the metadata data.frame for required columns.
 #'
 #' @noRd
-.valid_metadata <- function(metadata) {
+.valid_metadata <- function(metadata, error = TRUE) {
     txt <- character()
     if (!is.data.frame(metadata))
         txt <- c(txt, "'metadata' is expected to be a data.frame")
@@ -123,14 +124,16 @@ createCompoundDb <- function(x, metadata, path = ".") {
                              "named 'name' and 'value'"))
     }
     if (length(txt))
-        stop(paste(txt, collapse = "\n"))
+        if (error)
+            stop(paste(txt, collapse = "\n"))
+        else txt
     else TRUE
 }
 
 #' @description Check that the compounds table contains all required data.
 #'
 #' @noRd
-.valid_compound <- function(x) {
+.valid_compound <- function(x, error = TRUE) {
     txt <- character()
     if (!is.data.frame(x))
         txt <- c(txt, "'x' is supposed to be a data.frame")
@@ -144,6 +147,8 @@ createCompoundDb <- function(x, metadata, path = ".") {
             txt <- c(txt, "Column 'mass' should be numeric")
     }
     if (length(txt))
-        stop(paste(txt, collapse = "\n"))
+        if (error)
+            stop(paste(txt, collapse = "\n"))
+        else txt
     else TRUE
 }
