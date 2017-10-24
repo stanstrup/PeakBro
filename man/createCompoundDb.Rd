@@ -20,10 +20,20 @@ file should be written. Defaults to the current directory.}
 A \code{character} with the database name (invisibly).
 }
 \description{
-\code{createCompoundDb} creates a \code{SQLite}-based \code{CompoundDb} object/database
+\code{createCompoundDb} creates a \code{SQLite}-based \code{\link{CompoundDb}} object/database
 from a compound resource provided as a \code{data.frame} or \code{tbl}.
 An additional \code{data.frame} providing metadata information is mandatory.
 Required columns for the \code{data.frame} providing the compound information are:
+\itemize{
+\item \code{"id"}: the ID of the compound (e.g. an HMDB ID).
+\item \code{"name"}: the compound's name.
+\item \code{"inchi"}: the inchi of the compound.
+\item \code{"formula"}: the chemical formula.
+\item \code{"mass"}: the compound's mass.
+}
+
+See e.g. \code{\link[=generate_hmdb_tbl]{generate_hmdb_tbl()}} or \code{\link[=generate_lipidblast_tbl]{generate_lipidblast_tbl()}} for functions
+creating such compound tables.
 
 The metadata \code{data.frame} is supposed to have two columns named \code{"name"} and
 \code{"value"} providing the following minimal information as key-value pairs:

@@ -94,7 +94,7 @@ inchi2formula <- function(inchi){
 #' @param inchi Character vector with inchis
 #'
 #' @return Numeric vector
-# '
+#'
 #' @export
 #'
 #'
@@ -124,14 +124,17 @@ inchi2mass <- function(inchi){
 #'
 #' @param sdf_path Path to the Lipidmaps SDF file available at: http://www.lipidmaps.org/resources/downloads/
 #'
-#' @return A \code{\link{tibble}} containing the columns: id, name, inchi, formula, and mass.
-# '
+#' @return A \code{\link[tibble]{tibble}} containing the columns: id, name, inchi, formula, and mass.
+#'
 #' @export
 #'
 #' @importFrom ChemmineR read.SDFset datablock datablock2ma
 #' @importFrom tibble as_data_frame
 #' @importFrom tidyr replace_na unite
 #' @importFrom dplyr mutate select %>%
+#'
+#' @family compound table creation functions
+#' 
 #' @examples
 #' \dontrun{
 #' lipidmaps_tbl <- generate_lipidmaps_tbl("path/to/LMSDFDownload6Dec16FinalAll.sdf")
@@ -179,7 +182,7 @@ generate_lipidmaps_tbl <- function(sdf_path){
 #'
 #' @param json_path Path to the LipidBlast json file available at: http://mona.fiehnlab.ucdavis.edu/downloads
 #'
-#' @return A \code{\link{tibble}} containing the columns: id, name, inchi, formula, and mass.
+#' @return A \code{\link[tibble]{tibble}} containing the columns: id, name, inchi, formula, and mass.
 # '
 #' @export
 #'
@@ -188,6 +191,9 @@ generate_lipidmaps_tbl <- function(sdf_path){
 #' @importFrom purrr map_chr map_dbl
 #' @importFrom dplyr %>% mutate
 #' @importFrom magrittr %<>%
+#'
+#' @family compound table creation functions
+#' 
 #' @examples
 #' \dontrun{
 #' lipidblast_tbl <- generate_lipidblast_tbl("path/to/MoNA-export-LipidBlast.json")
@@ -237,7 +243,8 @@ generate_lipidblast_tbl <- function(json_path){
 #'     an HMDB release) or the names of several xml files, each supposed to
 #'     provide data for one compound.
 #'
-#' @return A `tbl` with general compound information (one row per compound):
+#' @return A [tibble::tibble] with general compound information (one row per
+#' compound):
 #' + `id`: the HMDB ID of the compound.
 #' + `name`: the compound's name.
 #' + `inchi`: the inchi of the compound.
@@ -249,6 +256,8 @@ generate_lipidblast_tbl <- function(json_path){
 #' @importFrom tools file_ext
 #' @importFrom purrr map_dfr
 #'
+#' @family compound table creation functions
+#' 
 #' @export
 #' 
 #' @md
@@ -405,9 +414,9 @@ parse_hmdb_sdf <- function(x) {
 #' To the name column "; " separater will be changed to a line break.
 #' This is mainly used internally.
 #'
-#' @param cmp_tbl \code{\link{tibble}} of compounds.
+#' @param cmp_tbl \code{\link[tibble]{tibble}} of compounds.
 #'
-#' @return A \code{\link{tibble}} containing the same columns as the input table.
+#' @return A \code{\link[tibble]{tibble}} containing the same columns as the input table.
 #'
 #' @export
 #'

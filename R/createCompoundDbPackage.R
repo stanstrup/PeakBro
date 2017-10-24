@@ -2,11 +2,18 @@
 #'
 #' @description
 #' 
-#' `createCompoundDb` creates a `SQLite`-based `CompoundDb` object/database
+#' `createCompoundDb` creates a `SQLite`-based [`CompoundDb`] object/database
 #' from a compound resource provided as a `data.frame` or `tbl`.
 #' An additional `data.frame` providing metadata information is mandatory.
 #' Required columns for the `data.frame` providing the compound information are:
+#' + `"id"`: the ID of the compound (e.g. an HMDB ID).
+#' + `"name"`: the compound's name.
+#' + `"inchi"`: the inchi of the compound.
+#' + `"formula"`: the chemical formula.
+#' + `"mass"`: the compound's mass.
 #'
+#' See e.g. [generate_hmdb_tbl()] or [generate_lipidblast_tbl()] for functions
+#' creating such compound tables.
 #' 
 #' The metadata `data.frame` is supposed to have two columns named `"name"` and
 #' `"value"` providing the following minimal information as key-value pairs:
@@ -152,3 +159,10 @@ createCompoundDb <- function(x, metadata, path = ".") {
         else txt
     else TRUE
 }
+
+#' @description
+#'
+#' `createCompoundDbPackage` creates an R data package with the data from a
+#' [`CompoundDb`] object.
+#'
+#' @noRd

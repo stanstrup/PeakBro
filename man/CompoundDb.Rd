@@ -61,7 +61,7 @@ cmp_db <- CompoundDb(db_file)
 cmp_db
 }
 \seealso{
-\code{createCompoundDb()} for the function to create a SQLite compound
+\code{\link[=createCompoundDb]{createCompoundDb()}} for the function to create a SQLite compound
 database.
 }
 \author{

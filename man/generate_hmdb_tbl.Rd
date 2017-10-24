@@ -14,7 +14,8 @@ an HMDB release) or the names of several xml files, each supposed to
 provide data for one compound.}
 }
 \value{
-A \code{tbl} with general compound information (one row per compound):
+A \link[tibble:tibble]{tibble::tibble} with general compound information (one row per
+compound):
 \itemize{
 \item \code{id}: the HMDB ID of the compound.
 \item \code{name}: the compound's name.
@@ -54,6 +55,10 @@ hmdb
 
 ## Extract the masses
 hmdb$mass
+}
+\seealso{
+Other compound table creation functions: \code{\link{generate_lipidblast_tbl}},
+  \code{\link{generate_lipidmaps_tbl}}
 }
 \author{
 Johannes Rainer

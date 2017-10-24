@@ -36,7 +36,7 @@
 #'
 #' @md
 #'
-#' @seealso `createCompoundDb()` for the function to create a SQLite compound
+#' @seealso [createCompoundDb()] for the function to create a SQLite compound
 #'     database.
 #'
 #' @examples
@@ -126,4 +126,26 @@ CompoundDb <- function(x) {
 
 .dbconn <- function(x) {
     x@dbcon
+}
+
+#' @description
+#'
+#' `compounds` extracts compound data from the `CompoundDb` object. In contrast
+#' to the `compound_tbl` it returns the actual data as a `data.frame`.
+#'
+#' @noRd
+compounds <- function(x) {
+    if (!is(x, "CompoundDb"))
+        stop("'x' is supposed to be a 'CompoundDb' object")
+}
+
+#' @description
+#'
+#' `compound_tbl` provides access to the `CompoundDb`'s *compound* table *via*
+#' the functionality from the `dplyr`/`dbplyr` package.
+#'
+#' @noRd
+compound_tbl <- function(x) {
+    if (!is(x, "CompoundDb"))
+        stop("'x' is supposed to be a 'CompoundDb' object")
 }
