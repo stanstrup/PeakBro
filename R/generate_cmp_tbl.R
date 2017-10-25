@@ -353,7 +353,8 @@ simple_parse_hmdb_xml <- function(x) {
     res <- list(
         id = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
                                              "accession"))),
-        name = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "name"))),
+        name = sub(pattern = "(\\s)*$", replacement = "",
+                   xml_text(xml_find_all(x, paste0(x_met, "/", ns, "name")))),
         inchi = xml_text(xml_find_all(x, paste0(x_met, "/", ns, "inchi"))),
         formula = xml_text(xml_find_all(x, paste0(x_met, "/", ns,
                                                   "chemical_formula"))),
@@ -372,8 +373,9 @@ simple_parse_hmdb_xml <- function(x) {
             data.frame(
                 id = xml_text(
                     xml_find_first(met, paste0("./", ns, "accession"))),
-                name = xml_text(
-                    xml_find_first(met, paste0("./", ns, "name"))),
+                name = sub(pattern = "(\\s)*$", replacement = "",
+                    xml_text(
+                    xml_find_first(met, paste0("./", ns, "name")))),
                 inchi = xml_text(
                     xml_find_first(met, paste0("./", ns, "inchi"))),
                 formula = xml_text(
