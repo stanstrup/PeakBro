@@ -235,7 +235,8 @@ generate_lipidblast_tbl <- function(json_path){
 #'     format and extracts general compound information.
 #'
 #' @note At present only a subset of the available data provided by HMDB are
-#'     extracted.
+#'     extracted. Also, compounds for which no mass is provided are not
+#'     reported.
 #' 
 #' @param file `character` with the name(s) of xml files downloaded from HMDB,
 #'     or the file name of a HMD file in SDF format.
@@ -301,7 +302,7 @@ generate_hmdb_tbl <- function(file) {
         ## Assume we've go A SINGLE file in SDF format.
         res <- map_dfr(file, parse_hmdb_sdf)
     }
-    as.tbl(res)
+    as.tbl(res[!is.na(res$mass), ])
 }
 
 #' @description Parse one HMDB xml file and return its results as a `data.frame`
