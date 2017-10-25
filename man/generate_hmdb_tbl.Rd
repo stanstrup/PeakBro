@@ -32,7 +32,8 @@ format and extracts general compound information.
 }
 \note{
 At present only a subset of the available data provided by HMDB are
-extracted.
+extracted. Also, compounds for which no mass is provided are not
+reported.
 }
 \examples{
 

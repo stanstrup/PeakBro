@@ -1,4 +1,4 @@
-#' @include createCompoundDbPackage.R
+#' @include createCompoundDbPackage.R query-engine.R
 
 #' @name CompoundDb
 #'
@@ -53,6 +53,23 @@
 #' ## Create a CompoundDb object
 #' cmp_db <- CompoundDb(db_file)
 #' cmp_db
+#'
+#' ## List all tables in the database and their columns
+#' tables(cmp_db)
+#'
+#' ## Extract a data.frame with the id, name and inchi of all compounds
+#' compounds(cmp_db, columns = c("id", "name", "inchi"))
+#'
+#' ## Use the CompoundDb in a dplyr setup
+#' library(dplyr)
+#' src_cmp <- src_compdb(cmp_db)
+#' src_cmp
+#'
+#' ## Get a tbl for the compound table
+#' cmp_tbl <- tbl(src_cmp, "compound")
+#'
+#' ## Extract the id, name and inchi
+#' cmp_tbl %>% select(id, name, inchi) %>% collect()
 NULL
 
 #' @exportClass CompoundDb
@@ -109,6 +126,13 @@ CompoundDb <- function(x) {
         if (is.character(res))
             stop(res)
         cdb <- .CompoundDb(dbcon = x)
+        ## fetch all tables and all columns for all tables.
+        tbl_nms <- dbListTables(x)
+        tbls <- lapply(tbl_nms, function(z) {
+            colnames(dbGetQuery(x, paste0("select * from ", z, " limit 1")))
+        })
+        names(tbls) <- tbl_nms
+        cdb@.properties$tables <- tbls
         return(cdb)
     }
     stop("Can not create a 'CompoundDb' from 'x' of type '", class(x), "'.")
@@ -132,25 +156,92 @@ CompoundDb <- function(x) {
 #' @description
 #'
 #' `compounds` extracts compound data from the `CompoundDb` object. In contrast
-#' to the `compound_tbl` it returns the actual data as a `data.frame`.
+#' to `src_compdb` it returns the actual data as a `data.frame` (if
+#' `return.type = "data.frame"`) or a [tibble::tibble()] (if
+#' `return.type = "tibble"`).
 #'
-#' @md
+#' @param columns For `compounds`: `character` with the names of the database
+#'     columns that should be retrieved. Use `tables` for a list of available
+#'     column names.
+#'
+#' @param filter For `compounds`: not yet supported.
+#'
+#' @param return.type For `compounds`: `character` defining the type/class of
+#'     the return object. Can be either `"data.frame"` (default) or
+#'     `"tibble"`.
+#'
+#' @importFrom tibble as_tibble
+#'
+#' @export
+#'
+#' @rdname CompoundDb
 #' 
-#' @noRd
-compounds <- function(x) {
+#' @md
+compounds <- function(x, columns, filter, return.type = "data.frame") {
     if (!is(x, "CompoundDb"))
         stop("'x' is supposed to be a 'CompoundDb' object")
+    match.arg(return.type, c("data.frame", "tibble"))
+    if (missing(columns))
+        columns <- .tables(x, "compound")[[1]]
+    res <- dbGetQuery(.dbconn(x),
+                      .build_query_CompoundDb(x, columns = columns,
+                                              filter = filter))
+    if (return.type == "tibble")
+        as_tibble(res)
+    else res
 }
 
 #' @description
 #'
-#' `compound_tbl` provides access to the `CompoundDb`'s *compound* table *via*
+#' `src_compdb` provides access to the `CompoundDb`'s database *via*
 #' the functionality from the `dplyr`/`dbplyr` package.
 #'
+#' @importFrom dbplyr src_dbi
+#'
+#' @export
+#' 
 #' @md
 #' 
 #' @noRd
-compound_tbl <- function(x) {
+src_compdb <- function(x) {
     if (!is(x, "CompoundDb"))
         stop("'x' is supposed to be a 'CompoundDb' object")
+    src_dbi(.dbconn(x), auto_disconnect = FALSE)
+}
+
+#' @description Get a list of all tables and their columns.
+#'
+#' @param x `CompoundDb` object.
+#'
+#' @param name optional `character` to return the table/columns for specified
+#'     tables.
+#'
+#' @param metadata `logical(1)` whether the metadata should be returned too.
+#' 
+#' @md
+#'
+#' @noRd
+.tables <- function(x, name, metadata = FALSE) {
+    tbls <- .get_property(x, "tables")
+    if (!missing(name))
+        tbls <- tbls[name]
+    if (!metadata)
+        tbls <- tbls[names(tbls) != "metadata"]
+    tbls
+}
+
+#' @description `tables` returns a named `list` (names being table names) with
+#'     the fields/columns from each table in the database.
+#'
+#' @export
+#' 
+#' @rdname CompoundDb
+#'
+#' @md
+tables <- function(x) {
+    .tables(x)
+}
+
+.get_property <- function(x, name) {
+    x@.properties[[name]]
 }

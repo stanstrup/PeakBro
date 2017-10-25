@@ -9,13 +9,18 @@
 \alias{show}
 \alias{dbconn}
 \alias{CompoundDb}
+\alias{compounds}
+\alias{tables}
 \alias{dbconn,CompoundDb-method}
 \title{Simple compound (metabolite) databases}
 \usage{
-dbconn(x)
 show(object)
 
 CompoundDb(x)
+
+compounds(x, columns, filter, return.type = "data.frame")
+
+tables(x)
 
 \S4method{dbconn}{CompoundDb}(x)
 }
@@ -24,6 +29,16 @@ CompoundDb(x)
 compound database. Alternatively it is possible to provide the connection
 to the database with parameter \code{x}.\preformatted{For all other methods: a `CompoundDb` object.
 }}
+
+\item{columns}{For \code{compounds}: \code{character} with the names of the database
+columns that should be retrieved. Use \code{tables} for a list of available
+column names.}
+
+\item{filter}{For \code{compounds}: not yet supported.}
+
+\item{return.type}{For \code{compounds}: \code{character} defining the type/class of
+the return object. Can be either \code{"data.frame"} (default) or
+\code{"tibble"}.}
 
 \item{object}{For all methods: a \code{CompoundDb} object.}
 }
@@ -35,6 +50,14 @@ database (usually an SQLite database).
 
 \code{CompoundDb} \emph{constructs} a \code{CompoundDb} object by connecting
 to the provided database file.
+
+\code{compounds} extracts compound data from the \code{CompoundDb} object. In contrast
+to \code{src_compdb} it returns the actual data as a \code{data.frame} (if
+\code{return.type = "data.frame"}) or a \code{\link[tibble:tibble]{tibble::tibble()}} (if
+\code{return.type = "tibble"}).
+
+\code{tables} returns a named \code{list} (names being table names) with
+the fields/columns from each table in the database.
 
 \code{dbconn} returns the connection (\code{DBIConnection}) to the
 database.
@@ -59,6 +82,23 @@ db_file <- createCompoundDb(cmps, metadata = metad, path = tempdir())
 ## Create a CompoundDb object
 cmp_db <- CompoundDb(db_file)
 cmp_db
+
+## List all tables in the database and their columns
+tables(cmp_db)
+
+## Extract a data.frame with the id, name and inchi of all compounds
+compounds(cmp_db, columns = c("id", "name", "inchi"))
+
+## Use the CompoundDb in a dplyr setup
+library(dplyr)
+src_cmp <- src_compdb(cmp_db)
+src_cmp
+
+## Get a tbl for the compound table
+cmp_tbl <- tbl(src_cmp, "compound")
+
+## Extract the id, name and inchi
+cmp_tbl \%>\% select(id, name, inchi) \%>\% collect()
 }
 \seealso{
 \code{\link[=createCompoundDb]{createCompoundDb()}} for the function to create a SQLite compound
