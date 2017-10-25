@@ -200,9 +200,9 @@ compounds <- function(x, columns, filter, return.type = "data.frame") {
 #'
 #' @export
 #' 
-#' @md
+#' @rdname CompoundDb
 #' 
-#' @noRd
+#' @md
 src_compdb <- function(x) {
     if (!is(x, "CompoundDb"))
         stop("'x' is supposed to be a 'CompoundDb' object")

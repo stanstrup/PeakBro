@@ -10,6 +10,7 @@
 \alias{dbconn}
 \alias{CompoundDb}
 \alias{compounds}
+\alias{src_compdb}
 \alias{tables}
 \alias{dbconn,CompoundDb-method}
 \title{Simple compound (metabolite) databases}
@@ -19,6 +20,8 @@ show(object)
 CompoundDb(x)
 
 compounds(x, columns, filter, return.type = "data.frame")
+
+src_compdb(x)
 
 tables(x)
 
@@ -55,6 +58,9 @@ to the provided database file.
 to \code{src_compdb} it returns the actual data as a \code{data.frame} (if
 \code{return.type = "data.frame"}) or a \code{\link[tibble:tibble]{tibble::tibble()}} (if
 \code{return.type = "tibble"}).
+
+\code{src_compdb} provides access to the \code{CompoundDb}'s database \emph{via}
+the functionality from the \code{dplyr}/\code{dbplyr} package.
 
 \code{tables} returns a named \code{list} (names being table names) with
 the fields/columns from each table in the database.

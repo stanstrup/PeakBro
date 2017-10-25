@@ -30,7 +30,7 @@ test_that(".prefix_columns works", {
 })
 
 test_that(".from works", {
-    expect_equal(.from("a"), "from a")
+    expect_equal(.from("a"), " from a")
     expect_error(.from(c("a", "b")))
 })
 
