@@ -10,7 +10,7 @@ generate_lipidmaps_tbl(sdf_path)
 \item{sdf_path}{Path to the Lipidmaps SDF file available at: http://www.lipidmaps.org/resources/downloads/}
 }
 \value{
-A \code{\link{tibble}} containing the columns: id, name, inchi, formula, and mass.
+A \code{\link[tibble]{tibble}} containing the columns: id, name, inchi, formula, and mass.
 }
 \description{
 Generate table with LipidMaps compounds
@@ -24,4 +24,8 @@ lipidmaps_tbl2 <- readRDS(system.file("extdata", "lipidmaps_tbl.rds", package="P
 }
 
 
+}
+\seealso{
+Other compound table creation functions: \code{\link{generate_hmdb_tbl}},
+  \code{\link{generate_lipidblast_tbl}}
 }

@@ -7,10 +7,10 @@
 cmp_tbl_pretty(cmp_tbl)
 }
 \arguments{
-\item{cmp_tbl}{\code{\link{tibble}} of compounds.}
+\item{cmp_tbl}{\code{\link[tibble]{tibble}} of compounds.}
 }
 \value{
-A \code{\link{tibble}} containing the same columns as the input table.
+A \code{\link[tibble]{tibble}} containing the same columns as the input table.
 }
 \description{
 This function modifies some of the columns in a compound table to be displayed better in an interactive table.

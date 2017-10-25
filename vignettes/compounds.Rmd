@@ -1,0 +1,117 @@
+---
+title: "Creating CompoundDb annotation resources"
+package: PeakABro
+output:
+  BiocStyle::html_document:
+    toc_float: true
+vignette: >
+  %\VignetteIndexEntry{Creating CompoundDb annotation resources}
+  %\VignetteEngine{knitr::rmarkdown}
+  %%\VignetteKeywords{Mass Spectrometry, Metabolomics, Infrastructure, Bioinformatics}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+```
+
+**Authors**: Johannes Rainer<br />
+**Modified**: `r file.info("compounds.Rmd")$mtime`<br />
+**Compiled**: `r date()`
+
+# Introduction
+
+Chemical compound annotation and information can be retrieved from a variety of
+sources including [HMDB](http://www.hmdb.ca) and
+[LipidMaps](http://www.lipidmaps.org). The `PeakABro` package provides
+functionality to extract data relevant for (chromatographic) peak annotations in
+metabolomics/lipidomics experiments from these sources and to store it into a
+common format (i.e. an `CompoundDb` object). This vignette describes how such
+`CompoundDb` objects can be created using information provided by HMDB. The code
+shown here is however largely applicable also to compound annotations from other
+resources.
+
+The R object to represent the compound annotation is the `CompoundDb`
+object. Each object is supposed to contain and provide annotations from a single
+source (e.g. HMDB or LipidMaps).
+
+# Create a `CompoundDb` object for HMDB
+
+The `PeakABro` package provides various functions to extract relevant compound
+annotation from files downloadable from a variety of sources. Examples are the
+`generate_lipidmaps_tbl` and the `generate_hmdb_tbl` functions. Below we use the
+latter to generate a compound table from an xml file downloaded from the HMDB
+database. This xml file was restricted to contain only information for 3
+compounds and is included in the `PeakABro` package. Note that the
+`generate_hmdb_tbl` supports also to extract compound information from HMDB
+files in *SDF* format.
+
+```{r generate_tbl, message = FALSE, warning = FALSE}
+library(PeakABro)
+
+## Create a CompoundDb from a sample xml from HMDB
+fl <- system.file("extdata/hmdb/hmdb_sub.xml", package = "PeakABro")
+cmps <- generate_hmdb_tbl(fl)
+```
+
+The function `generate_hmdb_tbl` returned a (`data.frame` equivalent) `tibble`
+(defined in the `tibble` R package) with 3 rows and 5 columns containing some
+basic compound annotations.
+
+```{r tbl}
+cmps
+```
+
+We pass this `tibble` along with additional metadata information to the
+`createCompoundDb` function that stores all annotations into a SQLite database
+file. Here it is crucial that we pass all relevant information, such as the
+originating resource's name and version to the function, since these will be
+used in the file name of the resulting database file. The metadata information
+should be provided as *name-value* pairs. Also, importantly, the organism should
+be provided in the form e.g. `"Hsapiens"` for homo sapiens, `"Mmusculus"` for
+mus musculus and so on.
+
+```{r createCompoundDb, message = FALSE, warnings = FALSE}
+## Define a data.frame containing the metadata.
+metad <- dplyr::data_frame(name = c("source", "url", "source_version",
+                                    "source_date", "organism"),
+                           value = c("HMDB", "www.hmdb.ca", "4",
+                                     "2017-08", "Hsapiens"))
+db_file <- createCompoundDb(cmps, metadata = metad, path = tempdir())
+```
+
+A `CompoundDb` object can now be created by passing this database file to the
+`CompoundDb` constructor function.
+
+```{r CompoundDb}
+cdb <- CompoundDb(db_file)
+cdb
+```
+
+# Create a `CompoundDb` package
+
+The purpose of storing the SQLite database from an `CompoundDb` in an R-package
+is to enable sharing of the resource and to separate analytical code and
+functionality from annotation. To support reproducible research, each
+`CompoundDb` package should contain the version of the originating data source
+in its file name (the default). Below we create a `CompoundDb` package from the
+database file generated in the previous section. We have to provide in addition
+some general information related to the package such as its version and its
+maintainer. 
+
+```{r createCompoundDbPackage, warning = FALSE}
+createCompoundDbPackage(
+    db_file, version = "0.0.1", author = "J Rainer", path = tempdir(),
+    maintainer = "Johannes Rainer <johannes.rainer@eurac.edu>")
+```
+
+Special care should also be put on the license of the package that can be passed
+with the `license` parameter. The license of the package and how and if the
+package can be distributed will depend also on the license of the originating
+resource.
+
+# Session information
+
+```{r sessioninfo, echo=FALSE}
+sessionInfo()
+```

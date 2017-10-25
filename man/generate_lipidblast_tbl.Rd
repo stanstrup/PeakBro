@@ -10,7 +10,7 @@ generate_lipidblast_tbl(json_path)
 \item{json_path}{Path to the LipidBlast json file available at: http://mona.fiehnlab.ucdavis.edu/downloads}
 }
 \value{
-A \code{\link{tibble}} containing the columns: id, name, inchi, formula, and mass.
+A \code{\link[tibble]{tibble}} containing the columns: id, name, inchi, formula, and mass.
 }
 \description{
 Generate table with LipidBlast compounds
@@ -24,4 +24,8 @@ lipidblast_tbl2 <- readRDS(system.file("extdata", "lipidblast_tbl.rds", package=
 }
 
 
+}
+\seealso{
+Other compound table creation functions: \code{\link{generate_hmdb_tbl}},
+  \code{\link{generate_lipidmaps_tbl}}
 }
