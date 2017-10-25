@@ -7,6 +7,8 @@
 #'
 #' @export
 #'
+#' @md
+#' 
 #' @rdname CompoundDb
 setMethod("dbconn", "CompoundDb", function(x) {
     .dbconn(x)
@@ -14,6 +16,8 @@ setMethod("dbconn", "CompoundDb", function(x) {
 
 #' @importFrom methods show
 #'
+#' @md
+#' 
 #' @export
 setMethod("show", "CompoundDb", function(object) {
     cat("class:", class(object), "\n")

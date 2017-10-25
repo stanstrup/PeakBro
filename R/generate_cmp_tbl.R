@@ -395,6 +395,9 @@ simple_parse_hmdb_xml <- function(x) {
 #' @description Parse the HMDB data in SDF format.
 #'
 #' @importFrom ChemmineR read.SDFset datablock datablock2ma
+#'
+#' @md
+#' 
 #' @noRd
 parse_hmdb_sdf <- function(x) {
     dblock <- datablock(read.SDFset(x))

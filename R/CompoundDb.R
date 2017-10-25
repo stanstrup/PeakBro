@@ -21,7 +21,6 @@
 #' the compound annotation data.
 #'
 #' @usage
-#' dbconn(x)
 #' show(object)
 #' 
 #' @param object For all methods: a `CompoundDb` object.
@@ -94,6 +93,8 @@ setValidity("CompoundDb", function(object) {
 #' @description `CompoundDb` *constructs* a `CompoundDb` object by connecting
 #'     to the provided database file.
 #'
+#' @md
+#' 
 #' @export
 CompoundDb <- function(x) {
     if (missing(x))
@@ -133,6 +134,8 @@ CompoundDb <- function(x) {
 #' `compounds` extracts compound data from the `CompoundDb` object. In contrast
 #' to the `compound_tbl` it returns the actual data as a `data.frame`.
 #'
+#' @md
+#' 
 #' @noRd
 compounds <- function(x) {
     if (!is(x, "CompoundDb"))
@@ -144,6 +147,8 @@ compounds <- function(x) {
 #' `compound_tbl` provides access to the `CompoundDb`'s *compound* table *via*
 #' the functionality from the `dplyr`/`dbplyr` package.
 #'
+#' @md
+#' 
 #' @noRd
 compound_tbl <- function(x) {
     if (!is(x, "CompoundDb"))

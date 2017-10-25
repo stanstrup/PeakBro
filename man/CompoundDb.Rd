@@ -33,11 +33,11 @@ annotations along with \emph{metadata} information such as the annotation's
 source, date and release version. The data is stored internally in a
 database (usually an SQLite database).
 
-`CompoundDb` *constructs* a `CompoundDb` object by connecting
-    to the provided database file.
+\code{CompoundDb} \emph{constructs} a \code{CompoundDb} object by connecting
+to the provided database file.
 
-`dbconn` returns the connection (`DBIConnection`) to the
-    database.
+\code{dbconn} returns the connection (\code{DBIConnection}) to the
+database.
 }
 \details{
 \code{CompoundDb} objects should be created using the constructor function

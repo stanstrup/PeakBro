@@ -77,6 +77,9 @@
 #'
 #' dbGetQuery(con, "select * from metadata")
 #' dbGetQuery(con, "select * from compound")
+#'
+#' ## To create a CompoundDb R-package we could simply use the
+#' ## createCompoundDb function on the SQLite database file name.
 createCompoundDb <- function(x, metadata, path = ".") {
     .valid_metadata(metadata)
     .valid_compound(x)
@@ -103,6 +106,8 @@ createCompoundDb <- function(x, metadata, path = ".") {
 #'     The function checks also for the presence of all required metadata fields
 #'     ensuring that these are also not `NA` or `NULL`.
 #'
+#' @md
+#' 
 #' @noRd
 .db_file_from_metadata <- function(x) {
     paste0("CompoundDb.", x$value[x$name == "organism"], ".",
@@ -110,8 +115,10 @@ createCompoundDb <- function(x, metadata, path = ".") {
            x$value[x$name == "source_version"])
 }
 
-#' @description Check the metadata data.frame for required columns.
+#' @description Check the metadata `data.frame` for required columns.
 #'
+#' @md
+#' 
 #' @noRd
 .valid_metadata <- function(metadata, error = TRUE) {
     txt <- character()
@@ -144,6 +151,8 @@ createCompoundDb <- function(x, metadata, path = ".") {
 
 #' @description Check that the compounds table contains all required data.
 #'
+#' @md
+#' 
 #' @noRd
 .valid_compound <- function(x, error = TRUE) {
     txt <- character()

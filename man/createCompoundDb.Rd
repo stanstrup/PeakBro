@@ -97,6 +97,9 @@ con <- dbConnect(dbDriver("SQLite"), db_f)
 
 dbGetQuery(con, "select * from metadata")
 dbGetQuery(con, "select * from compound")
+
+## To create a CompoundDb R-package we could simply use the
+## createCompoundDb function on the SQLite database file name.
 }
 \author{
 Johannes Rainer
